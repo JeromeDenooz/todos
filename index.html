@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<link href="../bootstrap/css/bootstrap.css" rel="stylesheet">
+	<title>Todo Management</title>
+</head>
+<body>
+	<div class="container">
+		<div class="text-center">
+			<h1>Todo Management</h1>
+		</div>
+		<div class="row">
+			<div>
+				<table class="table table-condensed">
+				<tbody>
+					<tr></tr>
+				</tbody>
+				</table>
+			</div>
+		</div>
+		<div class="row">
+			<div class="col-md-6 text-center">
+				<form class="form-inline">
+					<div class="form-group">
+						<label for="labelTodo">Nouvelle tache</label>
+						<input type="text" class="from-control" id="labelTodo">
+					</div>
+					<button type="submit" class="btn btn-primary pull-rigth" id="addLabelTodo">Ajouter</button>
+				</form>
+			</div>
+		</div>
+	</div>
+</body>
+<script
+  src="https://code.jquery.com/jquery-3.2.1.js"
+  integrity="sha256-DZAnKJ/6XZ9si04Hgrsxu/8s717jcIzLy3oi35EouyE="
+  crossorigin="anonymous"></script>
+<script src="../bootstrap/js/bootstrap.js"></script>
+<script>
+	$(function() {
+		function getTodos() {
+			$.ajax({
+				method: 'get',
+				url: 'index.php/todos'
+			});
+		};
+
+		function addTodos(todo) {
+			$.ajax({
+				method: 'post',
+				url: 'index.php/todos',
+				data: {
+					todo: todo
+				}
+			});
+		};
+
+		function deleteTodos(id) {
+			$.ajax({
+				method: 'delete',
+				url: 'index.php/todos/' + id,
+			});
+		};
+
+		getTodos();
+		addTodos('test');
+		deleteTodos(1);
+	});
+</script>
+</html>
