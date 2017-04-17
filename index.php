@@ -28,7 +28,18 @@ switch ($_SERVER['REQUEST_METHOD']) {
 				break;
 		}
 		break;
-	case 'PUT' : 
+	case 'PUT' :
+		switch ($route[1]) {
+			case 'todos' :
+				try {
+					parse_str(file_get_contents("php://input"),$post_vars);
+					$response = updateTodoDB($route[2], $post_vars['status']);
+				} catch (PDOException $e) {
+					echo $e->getMessage();
+				}
+				echo json_encode($response);
+				break;
+		}
 		break;
 	case 'DELETE' : 
 		break;
@@ -62,5 +73,14 @@ function getTodoDB() {
 	}
 	return $todo;
 };
+
+function updateTodoDB($id, $status) {
+	$db = new PDO("mysql:host=localhost;dbname=todo", "root", "", array(PDO::ATTR_ERRMODE=>PDO::ERRMODE_EXCEPTION));
+	try {
+		$query = $db->exec("UPDATE todos SET status=$status WHERE id=$id");
+	} catch (PDOException $e) {
+		echo $e->getMessage();
+	}
+}
 
 ?>

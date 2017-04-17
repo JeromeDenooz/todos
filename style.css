@@ -4,29 +4,32 @@
 	right: -70px;
 }
 
-#divAllTodos {
+#divAllTodos, #divOTWTodos {
 	display : none;
-	width: 50%;
+}
+
+#divAllTodos.btn {
+	height: 24px;
 }
 
 .status {
 	font-size: 75%;
 	font-style: italic;
 	position: absolute;
-	right: 70px;
+	right: 94px;
 	bottom: 10px;
 }
 
 .btnDeleteTodo {
 	position: absolute;
 	right: 2px;
-	bottom: 7px;
-	top: 7px;
+	bottom: 9px;
+	top: 9px;
 }
 
-.btnFinishTodo {
+.btnFinishTodo, .btnOnTheWayTodo {
 	position: absolute;
 	right: 28px;
-	bottom: 7px;
-	top: 7px;
+	bottom: 9px;
+	top: 9px;
 }

@@ -11,9 +11,14 @@
 			<h1>Todo Management</h1>
 		</div>
 		<div class="row">
-			<div id="divAllTodos">
+			<div id="divAllTodos" class="col-md-6">
 				<h3>Liste de toutes les t&#226;ches</h3>
 				<ul class="list-group" id="listAllTodos">
+				</ul>
+			</div>
+			<div id="divOTWTodos" class="col-md-6">
+				<h3>T&#226;ches en cours/&#224; commencer</h3>
+				<ul class="list-group" id="listOTWTodos">
 				</ul>
 			</div>
 		</div>
@@ -43,6 +48,21 @@
 			$('#listAllTodos>li').remove();
 			getTodos();
 		});
+
+		app.on('click', '.btnFinishTodo', function() {
+			var id = $(this).data('label-id');
+			updateStatus(id, 2);
+		});
+
+		app.on('click', '.btnOnTheWayTodo', function() {
+			var id = $(this).data('label-id');
+			updateStatus(id, 1);
+		});
+
+		app.on('click', '.btnDeleteTodo', function() {
+			var id = $(this).data('label-id');
+			updateStatus(id, 3);
+		});
 	});
 
 	function getTodos() {
@@ -51,24 +71,41 @@
 			url: 'index.php/todos'
 		}).then(function(response) {
 			$('#divAllTodos').show();
+			$('#divOTWTodos').show();
 			$.each(response, function(i, item) {
-				var status = "";
+				var status = "",
+					btnFinish = '<button type="button" class="btn btn-primary btn-xs glyphicon glyphicon-ok btnFinishTodo" data-label-id=' + response[i].id + '></button>',
+					btnCancel = '<button type="button" class="btn btn-primary btn-xs glyphicon glyphicon-remove btnDeleteTodo" data-label-id=' + response[i].id + '></button>',
+					btnOTW = '<button type="button" class="btn btn-primary btn-xs glyphicon glyphicon-refresh btnOnTheWayTodo" data-label-id=' + response[i].id + '></button>';
+
 				switch (response[i].status) {
 					case "0" :
 						status = "&#224; effectuer";
+						$('#listAllTodos').append(
+							'<li class="list-group-item">' + response[i].label + '<span class="status">' + status + '</span>' + btnOTW + btnCancel + '</li>');
+
+						$('#listOTWTodos').append(
+							'<li class="list-group-item">' + response[i].label + '<span class="status">' + status + '</span>' + btnOTW + btnCancel + '</li>');
 						break;
 					case "1" :
 						status = "en cours";
+						$('#listAllTodos').append(
+							'<li class="list-group-item list-group-item-warning">' + response[i].label + '<span class="status">' + status + '</span>' + btnFinish + btnCancel + '</li>');
+
+						$('#listOTWTodos').append(
+							'<li class="list-group-item list-group-item-warning">' + response[i].label + '<span class="status">' + status + '</span>' + btnFinish + btnCancel + '</li>');
 						break;
 					case "2" :
 						status = "termin&#233;e";
+						$('#listAllTodos').append(
+							'<li class="list-group-item list-group-item-success">' + response[i].label + '<span class="status">' + status + '</span></li>');
 						break;
 					case "3" :
 						status = "annul&#233;e";
+						$('#listAllTodos').append(
+							'<li class="list-group-item list-group-item-danger">' + response[i].label + '<span class="status">' + status + '</span></li>');
 						break;
 				}
-				$('#listAllTodos').append(
-					'<li class="list-group-item">' + response[i].label + '<span class="status">' + status + '</span><button type="button" class="btn btn-default btn-xs glyphicon glyphicon-ok btnFinishTodo" data-label-id=' + response[i].id + '></button><button type="button" class="btn btn-default btn-xs glyphicon glyphicon-remove btnDeleteTodo" data-label-id=' + response[i].id + '></button></li>');
 			});
 		});
 	};
@@ -85,10 +122,15 @@
 		});
 	};
 
-	function deleteTodos(id) {
+	function updateStatus(todo, status) {
 		$.ajax({
-			method: 'delete',
-			url: 'index.php/todos/' + id,
+			method: 'put',
+			url: 'index.php/todos/' + todo,
+			data : { status: status}
+		}).then(function(response) {
+			$('#listAllTodos>li').remove();
+			$('#listOTWTodos>li').remove();
+			getTodos();
 		});
 	};
 </script>
