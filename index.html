@@ -2,6 +2,7 @@
 <html>
 <head>
 	<link href="../bootstrap/css/bootstrap.css" rel="stylesheet">
+	<link href="style.css" rel="stylesheet">
 	<title>Todo Management</title>
 </head>
 <body>
@@ -10,61 +11,85 @@
 			<h1>Todo Management</h1>
 		</div>
 		<div class="row">
-			<div>
-				<table class="table table-condensed">
-				<tbody>
-					<tr></tr>
-				</tbody>
-				</table>
+			<div id="divAllTodos">
+				<h3>Liste de toutes les t&#226;ches</h3>
+				<ul class="list-group" id="listAllTodos">
+				</ul>
 			</div>
 		</div>
 		<div class="row">
-			<div class="col-md-6 text-center">
-				<form class="form-inline">
-					<div class="form-group">
-						<label for="labelTodo">Nouvelle tache</label>
-						<input type="text" class="from-control" id="labelTodo">
-					</div>
-					<button type="submit" class="btn btn-primary pull-rigth" id="addLabelTodo">Ajouter</button>
-				</form>
-			</div>
+			<form id="formAddTodo">
+				<div class="from-group  col-md-10">
+					<label for="todoLabel">Nouvelle t&#226;che </label>
+					<input type="text" id="todoLabel" class="form-control" placeholder="Ex : faire du sport">
+					<button type="button" class="btn btn-primary" id="btnAddTodo">Ajouter</button>
+				</div>
+			</form>
 		</div>
 	</div>
 </body>
 <script
-  src="https://code.jquery.com/jquery-3.2.1.js"
-  integrity="sha256-DZAnKJ/6XZ9si04Hgrsxu/8s717jcIzLy3oi35EouyE="
-  crossorigin="anonymous"></script>
+  src="https://code.jquery.com/jquery-3.2.1.js"></script>
 <script src="../bootstrap/js/bootstrap.js"></script>
-<script>
+<script type="text/javascript">
 	$(function() {
-		function getTodos() {
-			$.ajax({
-				method: 'get',
-				url: 'index.php/todos'
-			});
-		};
-
-		function addTodos(todo) {
-			$.ajax({
-				method: 'post',
-				url: 'index.php/todos',
-				data: {
-					todo: todo
-				}
-			});
-		};
-
-		function deleteTodos(id) {
-			$.ajax({
-				method: 'delete',
-				url: 'index.php/todos/' + id,
-			});
-		};
+		var app=$('.container');
 
 		getTodos();
-		addTodos('test');
-		deleteTodos(1);
+
+		app.on('click', '#btnAddTodo', function() {
+			addTodos($('#todoLabel').val());
+			$('#todoLabel').val("");
+			$('#listAllTodos>li').remove();
+			getTodos();
+		});
 	});
+
+	function getTodos() {
+		$.ajax({
+			method: 'get',
+			url: 'index.php/todos'
+		}).then(function(response) {
+			$('#divAllTodos').show();
+			$.each(response, function(i, item) {
+				var status = "";
+				switch (response[i].status) {
+					case "0" :
+						status = "&#224; effectuer";
+						break;
+					case "1" :
+						status = "en cours";
+						break;
+					case "2" :
+						status = "termin&#233;e";
+						break;
+					case "3" :
+						status = "annul&#233;e";
+						break;
+				}
+				$('#listAllTodos').append(
+					'<li class="list-group-item">' + response[i].label + '<span class="status">' + status + '</span><button type="button" class="btn btn-default btn-xs glyphicon glyphicon-ok btnFinishTodo" data-label-id=' + response[i].id + '></button><button type="button" class="btn btn-default btn-xs glyphicon glyphicon-remove btnDeleteTodo" data-label-id=' + response[i].id + '></button></li>');
+			});
+		});
+	};
+
+	function addTodos(todo) {
+		$.ajax({
+			method: 'post',
+			url: 'index.php/todos',
+			data: {
+				todo: todo
+			}
+		}).then(function(reponse) {
+			console.log(response);
+		});
+	};
+
+	function deleteTodos(id) {
+		$.ajax({
+			method: 'delete',
+			url: 'index.php/todos/' + id,
+		});
+	};
 </script>
 </html>

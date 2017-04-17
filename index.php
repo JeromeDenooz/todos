@@ -1,69 +1,66 @@
 <?php
-use \Psr\Http\Message\ServerRequestInterface as Request;
-use \Psr\Http\Message\ResponseInterface as Response;
+//var_dump($_SERVER);
+//exit();
+header('Content-Type: application/json');
+$route = explode("/", $_SERVER['PATH_INFO']);
 
-require 'vendor/autoload.php';
-
-// Create and configure Slim app
-$config = ['settings' => [
-    'addContentLengthHeader' => false,
-]];
-
-function dbConnect () {
-	return new PDO('mysql:host=localhost;dbname=todo', 'root', '');
+switch ($_SERVER['REQUEST_METHOD']) {
+	case 'POST' :
+		switch ($route[1]) {
+			case 'todos' :
+				try {
+					$response = addTodoDB($_POST['todo']);
+				} catch (PDOException $e) {
+					echo $e->getMessage();
+				}
+				break;
+		}
+		break;
+	case 'GET' :
+		switch ($route[1]) {
+			case 'todos' :
+				try {
+					$response = getTodoDB();
+				} catch (PDOException $e) {
+					echo $e->getMessage();
+				}
+				echo json_encode($response);
+				break;
+		}
+		break;
+	case 'PUT' : 
+		break;
+	case 'DELETE' : 
+		break;
 };
 
-$app = new \Slim\App;
+function addTodoDB ($todo) {
+	$db = new PDO('mysql:host=localhost;dbname=todo', 'root', '', array(PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION));
+	$query = $db->prepare("INSERT INTO todos(label, status) VALUES(:label, :status);");
+	$query->execute(array(
+		'label' => $todo,
+		'status' => 0
+	));
 
-$app->get('/todos', function (Request $request, Response $response) {
-	try {
-	$dbh = dbConnect();
-		$result = $dbh->query('SELECT * from todos');
-	} catch (PDOException $e) {
-	    print "Erreur !: " . $e->getMessage() . "<br/>";
-	    die();
+	return $db->lastInsertId();
+};
+
+function getTodoDB() {
+	$db = new PDO('mysql:host=localhost;dbname=todo', 'root', '', array(PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION));
+	$query = $db->query("SELECT * FROM todos");
+	$todo = array(array(
+		'id' => NULL,
+		'label' => "",
+		'status' => NULL
+	));
+	$i=0;
+	while ($data = $query->fetch()) {
+		$todo[$i]['id'] = $data['id'];
+		$todo[$i]['label'] = $data['label'];
+		$todo[$i]['status'] = $data['status'];
+		$i++;
 	}
-	var_dump($result);
-	die();
-	$response->getBody()->write($result);
-	return $response;
-});
+	return $todo;
+};
 
-$app->post('/todos', function (Request $request, Response $response) {
-	$newTodo = "Hello World!";
-
-	try {
-		$dbh = dbConnect();
-		$result = $dbh->exec('INSERT INTO todos (todo) VALUES ("' . $newTodo . '");');
-	} catch (PDOException $e) {
-	    print "Erreur !: " . $e->getMessage() . "<br/>";
-	    die();
-	}
-	var_dump($result);
-	$response->getBody()->write($result);
-	return $response;
-});
-
-$app->delete('/todos/{id}', function (Request $request, Response $response) {
-	$id = $request->getAttribute('id');
-	try {
-		$dbh = dbConnect();
-		$result = $dbh->exec('DELETE FROM todos WHERE id = ' . $id);
-	} catch (PDOException $e) {
-	    print "Erreur !: " . $e->getMessage() . "<br/>";
-	    die();
-	}
-	var_dump($result);
-	die();
-	$response->getBody()->write($result);
-	return $response;
-});
-
-// Define app routes
-$app->get('/hello/{name}', function ($request, $response, $args) {
-    return $response->write("Hello " . $args['name']);
-});
-
-// Run app
-$app->run();
-
+?>
